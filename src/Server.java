@@ -7,7 +7,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.io.PrintWriter;
-
+//https://openclassrooms.com/courses/introduction-aux-sockets-1
 public class Server {
 	
 	public static void main(String[] zero) {
