@@ -16,7 +16,7 @@ public class Server {
 		Socket socketduserveur ;
 		BufferedReader in;
 		PrintWriter out;
-		
+	//	
 		try {
 		
 			socketserver = new ServerSocket(2009);
