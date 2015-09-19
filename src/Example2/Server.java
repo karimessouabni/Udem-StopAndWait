@@ -40,6 +40,8 @@ public class Server
    {  if (socket != null)    socket.close();
       if (streamIn != null)  streamIn.close();
    }
+   
+   
    public static void main(String args[])
    {  Server server = null;
       if (args.length != 1)
