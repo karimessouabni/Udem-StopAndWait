@@ -27,6 +27,7 @@ public class tcpServeur
 		int port=1500;
 		ServerSocket socket_serveur;
 		BufferedReader input;
+		PrintWriter out;
 		
 		
 		System.out.println("\n\n*********************************");
@@ -59,8 +60,14 @@ public class tcpServeur
 				Socket socket = socket_serveur.accept();
 				System.out.println("nouvelle connexion acceptee " +
 						   socket.getInetAddress() +
-						   ":" + socket.getPort());
+						   ":" + socket.getPort()+"\n");
+				out = new PrintWriter(socket.getOutputStream());
+		        out.println(" \t=== Connexion reussie. Bienvenue ! ===");
+		        out.flush();
+		                
+
 				input = new BufferedReader(new InputStreamReader(socket.getInputStream())); 
+				System.out.println("\nKarim TEst = "+input.readLine());
 				
 				// imprimer le texte re�u 
 				try 
@@ -81,8 +88,15 @@ public class tcpServeur
 				// connexion ferm�e par client
 				try 
 				{
+					
+					//== AJOUTE
+					out = new PrintWriter(socket.getOutputStream());
+			        out.println(" \t=== Au revoir client ! ===");
+			        out.flush();
+					//== AJOUTE			        
+			        
 					socket.close();
-					System.out.println("connexion ferm�e par le client");
+					System.out.println("connexion fermee par le client");
 				}
 				catch (IOException e) {
 					System.out.println(e);

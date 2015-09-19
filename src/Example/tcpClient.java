@@ -12,11 +12,15 @@ import java.io.*;
 
 public class tcpClient 
 {
+	
+	
 	public static void main(String[] args) 
 	{
 		//port et adresse
 		int port=1500;
 		InetAddress adresse=null;
+		BufferedReader in;
+		PrintWriter out;
 		
 		//socket
 		Socket socket = null;
@@ -33,13 +37,13 @@ public class tcpClient
 		System.out.println("*********************************\n\n");
 		
 		
-		// si l'adresse et le port sont donn�s en argument!!
+		// si l'adresse et le port sont donnes en argument!!
 		if(args.length == 2) 
 		{
 			//adresse
 			try 
 			{ 
-				adresse = InetAddress.getByName(args[0]);
+				adresse = InetAddress.getByName(args[0]); // Premier argument contient l'adresse du serveur 
 			}
 			catch (UnknownHostException e) 
 			{
@@ -49,7 +53,7 @@ public class tcpClient
 			//port
 			try 
 			{ 
-				port = Integer.parseInt(args[1]);
+				port = Integer.parseInt(args[1]); // Port dans le deuxiem argument 
 			}
 			catch (Exception e) 
 			{
@@ -79,10 +83,26 @@ public class tcpClient
 			System.out.println("Etablissement de connexion vers  \\ " +
 					   adresse.getHostAddress()+
 					   ":" + port+ ", veuillez patienter...");
-			socket = new Socket(adresse, port);
+			
+		        
+			socket = new Socket(adresse, port);// doivent etre passés en arguments
 			System.out.println("connecte au serveur " +
 					   socket.getInetAddress()+
-					   ":" + socket.getPort()+ ": inserer du texte a envoyer");
+					   ":" + socket.getPort() );
+			
+			
+			
+			/* Recuperation du MSG de bienvenu envoyé par le serveur */   
+			in = new BufferedReader (new InputStreamReader (socket.getInputStream()));
+		        String message_distant = in.readLine();
+		        System.out.println(message_distant);
+		        
+		    /* Recuperation du MSG de bienvenu envoyé par le serveur */ 
+		        
+		        
+		    System.out.println("\n inserer du texte a envoyer");
+		        
+		        
 		
 		} catch (UnknownHostException e) {
 			System.out.println("\nServeur " + adresse +":"+ port + " inconnu.");
@@ -95,24 +115,29 @@ public class tcpClient
 			System.exit(1);
 		}
 	
+		
+		// == connexion reussie == // 
 		//Envoi de message texte au serveur
 		try 
 		{
-			//les �changes avec le ssocket serveur se font � travers impout et output
-			input = new BufferedReader(new InputStreamReader(System.in)); 
-			output = new PrintWriter(socket.getOutputStream(),true);
+			//les echanges avec le ssocket serveur se font a travers impout et output
+			input = new BufferedReader(new InputStreamReader(System.in));
+			System.out.println("karim Testing : "+input.readLine());
+			output = new PrintWriter(socket.getOutputStream(),true); // 
 			
-			// on envoi le message ins�r� sur console
+			// on envoi le message insere sur console
 			while(true) 
 			{
 				lineToBeSent = input.readLine();
 				
-				// arr�t si ligne= "."
 				if(lineToBeSent.equals("."))
 				{
-					break;
+					break; // Break pour sortir de la boucle et fermer la connexion 
 				}
+				
 				output.println(lineToBeSent);
+				System.out.println("Test : "+lineToBeSent);
+				
 			}
 		}
 		catch (IOException e) 
@@ -125,6 +150,13 @@ public class tcpClient
 			System.out.println("fermeture de connexion avec le serveur " +
 							socket.getInetAddress()+
 							":" + socket.getPort());
+			
+			/* Recuperation du MSG de Fermeture envoyé par le serveur */   
+			in = new BufferedReader (new InputStreamReader (socket.getInputStream()));
+		        String message_distant = in.readLine();
+		        System.out.println(message_distant);
+		        
+		    /* Recuperation du MSG de Fermeture envoyé par le serveur */ 
 			socket.close();
 		}
 		catch (IOException e) 
