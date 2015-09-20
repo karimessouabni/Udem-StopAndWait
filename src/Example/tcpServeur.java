@@ -33,7 +33,7 @@ public class tcpServeur
 		System.out.println("\n\n*********************************");
 		System.out.println("***********Serveur***************");
 		System.out.println("*********************************\n\n");
-		// si le port est donn� en argument!!
+		// si le port est donnée en argument!!
 		if(args.length == 1) 
 		{
 			try 

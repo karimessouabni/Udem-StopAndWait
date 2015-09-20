@@ -28,10 +28,15 @@ public class Serveur {
 		BufferedOutputStream bos = null;
 		int bytesRead;
 		int current = 0;
+		
+ 
+		
+		
 
 		int port = 1500;
 		ServerSocket socket_serveur;
 		BufferedReader input;
+		PrintWriter out; // Ajouté 
 
 		System.out.println("\n\n*********************************");
 		System.out.println("***********Serveur***************");
@@ -73,19 +78,19 @@ public class Serveur {
 					bytesRead = is.read(mybytearray, 0, mybytearray.length);
 					current = bytesRead;
 
-					do {
-						bytesRead = is.read(mybytearray, current,
-								(mybytearray.length - current));
-						if (bytesRead >= 0)
-							current += bytesRead;
-						System.out.println("current =  "+current);
-					} while (current < 41);
-
 					bos.write(mybytearray, 0, current);
+					System.out.println("File " + FILE_TO_RECEIVED
+							+ " downloaded (  bytes read)");
 					bos.flush();
 					
-					System.out.println("File " + FILE_TO_RECEIVED
-							+ " downloaded (" + current + " bytes read)");
+					
+				if ( numero tram == 2 ) {
+					
+				}
+				else 	out = new PrintWriter(socket.getOutputStream());
+			        out.println(" \t=== Evnoi de tram reussie ! ("+current+" octets)");
+			        out.flush();
+			        
 
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block

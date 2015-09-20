@@ -93,14 +93,25 @@ public class Client {
 			byte[] mybytearray = new byte[(int) myFile.length()];
 			fis = new FileInputStream(myFile);
 			bis = new BufferedInputStream(fis);
-			bis.read(mybytearray, 0, mybytearray.length); 
+//			bis.read(mybytearray, 0, mybytearray.length);
+			bis.read(mybytearray, 0, 5); // envoi de 5 octets seulement 
 			os = socket.getOutputStream();
-			System.out.println("Sending " + FILE_TO_SEND + "("+ mybytearray.length + " bytes)");
+			System.out.println("Sending " + FILE_TO_SEND + "( 5 bytes)");
 			
 			os.write(mybytearray, 0, mybytearray.length);// Ici on commence l'ecriture du fichier au byt 0 -> a changer
+			os.write(mybytearray, 0, 5); // Ecrire juste 5 octets 
 			
 			os.flush();
 			System.out.println("Done.");
+			
+			/* Recuperation du MSG de bienvenu envoyé par le serveur */   
+				input = new BufferedReader (new InputStreamReader (socket.getInputStream()));
+		        String message_distant = input.readLine();
+		        System.out.println(message_distant);
+		        
+		    /* Recuperation du MSG de bienvenu envoyé par le serveur */
+		        
+		        
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
