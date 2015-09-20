@@ -84,12 +84,12 @@ public class Serveur {
 					bos.flush();
 					
 					
-				if ( numero tram == 2 ) {
+				
 					
-				}
-				else 	out = new PrintWriter(socket.getOutputStream());
-			        out.println(" \t=== Evnoi de tram reussie ! ("+current+" octets)");
-			        out.flush();
+//				}
+//				else 	out = new PrintWriter(socket.getOutputStream());
+//			        out.println(" \t=== Evnoi de tram reussie ! ("+current+" octets)");
+//			        out.flush();
 			        
 
 				} catch (IOException e1) {
