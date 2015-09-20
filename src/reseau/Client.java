@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.TreeMap;
 import java.io.*;
 
-import Example2.Tram;
-
 /**
  * TCPClient Utilisation: Lancer l'application par la commande java tcpClient
  * <adresse IP du serveur> <port destination> Ins�rer une ligne et taper

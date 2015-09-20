@@ -1,4 +1,4 @@
-package Example2;
+package reseau;
 
 import java.io.Serializable;
 

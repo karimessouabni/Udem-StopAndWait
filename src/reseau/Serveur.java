@@ -11,8 +11,6 @@ import java.net.*;
 import java.util.ArrayList;
 import java.io.*;
 
-import Example2.Tram;
-
 /**
  * TCPServeur Utilisation: Lancer l'application par la commande java tcpServeur
  * <port d'ecoute> Le serveur reste en attente d'un client. Quand la connexion
