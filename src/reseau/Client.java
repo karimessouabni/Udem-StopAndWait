@@ -1,6 +1,8 @@
 package reseau;
 
 import java.net.*;
+import java.util.ArrayList;
+import java.util.TreeMap;
 import java.io.*;
 
 /**
@@ -86,22 +88,90 @@ public class Client {
 			System.exit(1);
 		}
 
-		// Envoi du fichier au serveur
+		
+		
+		/* 
+		 * Envoi du fichier au serveur
+		 * 
+		 * 
+		 * 
+		 */
+		
+		/*
+		 * ETAPE 1 : Decouper le fichier en plusieur parties de 5byte et 
+		 * 			 les stockées dans un ArrayList sous la forme d'objets Tram 
+		 */
 
 		try {
 			File myFile = new File(FILE_TO_SEND);
-			byte[] mybytearray = new byte[(int) myFile.length()];
+			ArrayList<Tram> listTrames = new ArrayList<Tram>() ; 
+			int tramNbr = 0 ; 
+			int whereToStart = 0 ; 
+
+			int tailleFile = (int) myFile.length() ;
+			
+			System.out.println("\nLa taille du fichier a transferer vers le serveurs est de : "+tailleFile);
+			
 			fis = new FileInputStream(myFile);
 			bis = new BufferedInputStream(fis);
-//			bis.read(mybytearray, 0, mybytearray.length);
-			bis.read(mybytearray, 0, 5); // envoi de 5 octets seulement 
-			os = socket.getOutputStream();
-			System.out.println("Sending " + FILE_TO_SEND + "( 5 bytes)");
 			
-			os.write(mybytearray, 0, mybytearray.length);// Ici on commence l'ecriture du fichier au byt 0 -> a changer
-			os.write(mybytearray, 0, 5); // Ecrire juste 5 octets 
+			while (tailleFile > 5 && whereToStart+5<tailleFile){ // Bouble pour construire une TreeMap<key:numerotram, value: les 5octets>
+				byte[] octetsToSend = new byte[5]; 
+				bis.read(octetsToSend, 0, 5); // Pour lire dans le buf et mettre juste 5 octete dans contenuOctets
+				Tram trame = new Tram(octetsToSend, tramNbr); 
+				listTrames.add(trame);
+				System.out.println(" start from : = "+whereToStart);
+				
+				tramNbr++;
+				whereToStart+=5;
+				
+				
+			}
 			
-			os.flush();
+			if( whereToStart < tailleFile){ // S'il reste des octet < 5
+				byte[] octetsToSend = new byte[tailleFile-whereToStart]; 
+				bis.read(octetsToSend, 0, tailleFile-whereToStart);
+				Tram trame = new Tram(octetsToSend, tramNbr); 
+				System.out.println(" start from : = "+whereToStart+"to "+tailleFile+"");
+				listTrames.add(trame);
+			}
+			
+			System.out.println(" la taille de la liste des trams a envoyé = "+listTrames.size());
+			
+			
+			/*
+			 * ETAPE 2 : Envoi des trams stockées prealablement dans le tableau une a une  
+			 * 			 1 Declancher le timer 
+			 * 			 2 Envoi de la "trame i " au serveur 
+			 * 			 3 Attendre un Ack avant d'envoyer la trame i+1
+			 * 
+			 */
+			
+			
+			
+			ObjectOutputStream oos =  new ObjectOutputStream(socket.getOutputStream());
+			
+			for(Tram trame : listTrames){
+				oos.writeObject(trame);
+				System.out.println("Envoie de la trame id = "+trame.id);
+				
+//				try {
+//				    Thread.sleep(2000);                 //1000 mili scd
+//				} catch(InterruptedException ex) {
+//				    Thread.currentThread().interrupt();
+//				}
+			}
+			oos.flush();
+			
+			
+			
+			//Envoi message 
+//			String str = "initialize";
+//		    oos.writeObject(str);
+//			oos.flush();		    
+		    
+			
+
 			System.out.println("Done.");
 			
 			/* Recuperation du MSG de bienvenu envoyé par le serveur */   

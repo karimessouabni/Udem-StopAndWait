@@ -8,6 +8,7 @@ package reseau;
 // this server handles only 1 connection.
 
 import java.net.*;
+import java.util.ArrayList;
 import java.io.*;
 
 /**
@@ -28,15 +29,11 @@ public class Serveur {
 		BufferedOutputStream bos = null;
 		int bytesRead;
 		int current = 0;
-		
- 
-		
-		
 
 		int port = 1500;
 		ServerSocket socket_serveur;
 		BufferedReader input;
-		PrintWriter out; // Ajouté 
+		PrintWriter out; // Ajouté
 
 		System.out.println("\n\n*********************************");
 		System.out.println("***********Serveur***************");
@@ -64,52 +61,92 @@ public class Serveur {
 						+ socket.getInetAddress() + ":" + socket.getPort());
 				input = new BufferedReader(new InputStreamReader(
 						socket.getInputStream()));
+				// timeout a 1000
+				socket.setSoTimeout(1000);
 
 				// Reception d'un Fichier
+				/*
+				 * try {
+				 * 
+				 * byte[] mybytearray = new byte[FILE_SIZE]; InputStream is; is
+				 * = socket.getInputStream();
+				 * 
+				 * fos = new FileOutputStream(FILE_TO_RECEIVED); bos = new
+				 * BufferedOutputStream(fos); bytesRead = is.read(mybytearray,
+				 * 0, mybytearray.length); current = bytesRead;
+				 * 
+				 * bos.write(mybytearray, 0, current);
+				 * System.out.println("File " + FILE_TO_RECEIVED +
+				 * " downloaded (  bytes read)"); bos.flush();
+				 * 
+				 * 
+				 * // } // else out = new PrintWriter(socket.getOutputStream());
+				 * //
+				 * out.println(" \t=== Evnoi de tram reussie ! ("+current+" octets)"
+				 * ); // out.flush();
+				 * 
+				 * } catch (IOException e1) { // TODO Auto-generated catch block
+				 * e1.printStackTrace(); }
+				 */
+
+				/*
+				 * 
+				 * Reception des Trames envoyées par le client 1 Rassembler le
+				 * tout dans un tableau
+				 */
+
+				ArrayList<Tram> listTrames = new ArrayList<Tram>();
 				try {
+					ObjectInputStream ois = new ObjectInputStream(
+							socket.getInputStream());
+					String str;
+					Tram trame;
+					while ((trame = (Tram) ois.readObject()) != null) {
+						System.out.println("\n id Trame recu = " + trame.id);
 
-					
-					byte[] mybytearray = new byte[FILE_SIZE];
-					InputStream is;
-					is = socket.getInputStream();
+						listTrames.add(trame);
+						if (trame.id==8) break ;
+						//
+						// try {
+						// Thread.sleep(2000); //1000 mili scd
+						// } catch(InterruptedException ex) {
+						// Thread.currentThread().interrupt();
+						// }
 
-					fos = new FileOutputStream(FILE_TO_RECEIVED);
-					bos = new BufferedOutputStream(fos);
-					bytesRead = is.read(mybytearray, 0, mybytearray.length);
-					current = bytesRead;
-
-					bos.write(mybytearray, 0, current);
-					System.out.println("File " + FILE_TO_RECEIVED
-							+ " downloaded (  bytes read)");
-					bos.flush();
-					
-					
-				
-					
-//				}
-//				else 	out = new PrintWriter(socket.getOutputStream());
-//			        out.println(" \t=== Evnoi de tram reussie ! ("+current+" octets)");
-//			        out.flush();
-			        
-
-				} catch (IOException e1) {
+					}
+				} catch (ClassNotFoundException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
+
+				/*
+				 * ETAPE 2 : parcourir le tableau contenant les trames pour les
+				 * rasesmbler
+				 */
+
 				
-		/*		
-				// imprimer le texte re�u
-				try {
-					while (true) {
-						String message = input.readLine();
-						if (message == null)
-							break;
-						System.out.println(message);
-					}
-				} catch (IOException e) {
-					System.out.println(e);
+				System.out.println("Etap 2 ");
+				
+				fos = new FileOutputStream(FILE_TO_RECEIVED);
+				bos = new BufferedOutputStream(fos);
+				
+				for (Tram trame : listTrames) {
+
+					bos.write(trame.tabOct, 0, trame.tabOct.length ); // ecrire  les 5 bytes de la trame i  ( ou moins pour la derniere)  dans bos
+				    bos.flush();
+					System.out.println("trame n° "+trame.id +"du ficier : "+ FILE_TO_RECEIVED
+							+ " downloaded ("+trame.tabOct.length+ "bytes read)");
+
 				}
-*/
+
+				
+				
+				/*
+				 * // imprimer le texte re�u try { while (true) { String message
+				 * = input.readLine(); if (message == null) break;
+				 * System.out.println(message); } } catch (IOException e) {
+				 * System.out.println(e); }
+				 */
 				// connexion ferm�e par client
 				try {
 					socket.close();
