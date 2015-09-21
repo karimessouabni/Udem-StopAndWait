@@ -16,8 +16,11 @@ public class Tram implements Serializable{
 		this.tabOct=t ; 
 		this.id = i ; 
 	}
-
-
+	public Tram(Tram t) {
+		this.tabOct=t.getTabOct() ; 
+		this.id = t.getId() ; 
+	}
+	
 	public byte[] getTabOct() {
 		return tabOct;
 	}
@@ -37,6 +40,10 @@ public class Tram implements Serializable{
 		this.id = id;
 	}
 
-	
+	public void copie (Tram t)
+	{
+		this.id = t.getId();
+		this.tabOct = t.getTabOct();
+	}
 	
 }

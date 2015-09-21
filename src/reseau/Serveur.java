@@ -21,7 +21,7 @@ import java.io.*;
 public class Serveur {
 
 	private static final int FILE_SIZE = 6022386;
-	public final static String FILE_TO_RECEIVED = "/Users/karim/Desktop/Sourcetelechargee.txt";
+	public final static String FILE_TO_RECEIVED = "\\Users\\Enis\\Desktop\\Sourcetelechargee.txt";
 
 	public static void main(String args[]) {
 
@@ -97,14 +97,21 @@ public class Serveur {
 
 				ArrayList<Tram> listTrames = new ArrayList<Tram>();
 				try {
-					ObjectInputStream ois = new ObjectInputStream(
-							socket.getInputStream());
+					ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+					ObjectOutputStream oos =  new ObjectOutputStream(socket.getOutputStream());
 					String str;
 					Tram trame;
+					Tram ack;
+					
 					while ((trame = (Tram) ois.readObject()) != null) {
 						System.out.println("\n id Trame recu = " + trame.id);
-
 						listTrames.add(trame);
+					
+					// envoie ACK //	
+						ack = new Tram(trame); // Pas trouver autre choix de faire sa 
+						ack.setTabOct("OK".getBytes());
+						oos.writeObject(ack);
+						
 						if (trame.id==8) break ;
 						//
 						// try {
@@ -112,8 +119,9 @@ public class Serveur {
 						// } catch(InterruptedException ex) {
 						// Thread.currentThread().interrupt();
 						// }
-
+						oos.flush();
 					}
+					
 				} catch (ClassNotFoundException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -134,7 +142,7 @@ public class Serveur {
 
 					bos.write(trame.tabOct, 0, trame.tabOct.length ); // ecrire  les 5 bytes de la trame i  ( ou moins pour la derniere)  dans bos
 				    bos.flush();
-					System.out.println("trame nÂ° "+trame.id +"du ficier : "+ FILE_TO_RECEIVED
+					System.out.println("trame n° "+trame.id +" du ficier : "+ FILE_TO_RECEIVED
 							+ " downloaded ("+trame.tabOct.length+ "bytes read)");
 
 				}

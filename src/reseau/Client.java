@@ -14,7 +14,7 @@ import java.io.*;
 public class Client {
 
 	public final static int SOCKET_PORT = 13267;
-	public final static String FILE_TO_SEND = "/Users/karim/Desktop/source.txt";
+	public final static String FILE_TO_SEND = "\\Users\\Enis\\Desktop\\source.txt";
 
 	public static void main(String[] args) {
 
@@ -148,13 +148,21 @@ public class Client {
 			 */
 			
 			
-			
+			Tram ack ;
 			ObjectOutputStream oos =  new ObjectOutputStream(socket.getOutputStream());
-			
+			ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
 			for(Tram trame : listTrames){
 				oos.writeObject(trame);
 				System.out.println("Envoie de la trame id = "+trame.id);
+				try {
+				// recupere l'ACK //	
+					ack = (Tram)ois.readObject();
 				
+					System.out.println("ID ack"+ack.getId());
+				} catch (ClassNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 //				try {
 //				    Thread.sleep(2000);                 //1000 mili scd
 //				} catch(InterruptedException ex) {
