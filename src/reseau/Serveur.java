@@ -9,19 +9,24 @@ package reseau;
 
 import java.net.*;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.io.*;
 
 /**
  * TCPServeur Utilisation: Lancer l'application par la commande java tcpServeur
  * <port d'ecoute> Le serveur reste en attente d'un client. Quand la connexion
- * est ï¿½tablie, il va afficher les messages envoyï¿½es par ce client quitter
+ * est etablie, il va afficher les messages envoyees par ce client quitter
  * l'application avec ctrl+C
  **/
 
 public class Serveur {
 
 	private static final int FILE_SIZE = 6022386;
-	public final static String FILE_TO_RECEIVED = "\\Users\\Enis\\Desktop\\Sourcetelechargee.txt";
+
+	// public final static String FILE_TO_RECEIVED =
+	// "\\Users\\Enis\\Desktop\\Sourcetelechargee.txt";
+	public final static String FILE_TO_RECEIVED = "/Users/karim/Desktop/Sourcetelechargee.txt";
 
 	public static void main(String args[]) {
 
@@ -38,7 +43,7 @@ public class Serveur {
 		System.out.println("\n\n*********************************");
 		System.out.println("***********Serveur***************");
 		System.out.println("*********************************\n\n");
-		// si le port est donnï¿½ en argument!!
+		// si le port est donne en argument!!
 		if (args.length == 1) {
 			try {
 				port = Integer.parseInt(args[0]);
@@ -62,7 +67,7 @@ public class Serveur {
 				input = new BufferedReader(new InputStreamReader(
 						socket.getInputStream()));
 				// timeout a 1000
-				socket.setSoTimeout(1000);
+			
 
 				// Reception d'un Fichier
 				/*
@@ -97,31 +102,64 @@ public class Serveur {
 
 				ArrayList<Tram> listTrames = new ArrayList<Tram>();
 				try {
-					ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
-					ObjectOutputStream oos =  new ObjectOutputStream(socket.getOutputStream());
+					ObjectInputStream ois = new ObjectInputStream(
+							socket.getInputStream());
+					ObjectOutputStream oos = new ObjectOutputStream(
+							socket.getOutputStream());
 					String str;
 					Tram trame;
 					Tram ack;
-					
+
 					while ((trame = (Tram) ois.readObject()) != null) {
 						System.out.println("\n id Trame recu = " + trame.id);
 						listTrames.add(trame);
-					
-					// envoie ACK //	
-						ack = new Tram(trame); // Pas trouver autre choix de faire sa 
-						ack.setTabOct("OK".getBytes());
-						oos.writeObject(ack);
-						
-						if (trame.id==8) break ;
-						//
-						// try {
-						// Thread.sleep(2000); //1000 mili scd
-						// } catch(InterruptedException ex) {
-						// Thread.currentThread().interrupt();
-						// }
+
+						// envoie ACK //
+						ack = new Tram(null, trame.id);// Envoi une trame vide
+														// de 0 octets mais avec
+														// l'id de la trame
+														// d'avant
+						Timer timer = new Timer();
+						if (ack.id == 6) {
+
+							timer.schedule(new TimerTask() {
+								@Override
+								public void run() {
+									try {
+										Tram ack = new Tram(null, 6);
+										System.out
+												.println("\nEnvoie de l'ack 6");
+										oos.writeObject(ack);
+									} catch (IOException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+								}
+							}, 11000);
+
+							// try {
+							// // Thread.sleep(2000); // Attente de 2 sec ->
+							// avant la fin du timer
+							// // Thread.sleep(4000); // Attente de 4 sec ->
+							// apres la fin de timer -> renvoi !!!!
+							// oos.writeObject(ack);
+							// } catch (InterruptedException ex) {
+							// Thread.currentThread().interrupt();
+							// }
+							// Envoi de l'ack apres 2 secondes
+
+						} else {
+							oos.writeObject(ack);
+							// ack.setTabOct("OK".getBytes()); // Pourquoi faire
+							// ??
+						}
+
+						if (trame.id == 8)
+							break; // le break est a refaire dynamiquement
+
 						oos.flush();
 					}
-					
+
 				} catch (ClassNotFoundException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -132,33 +170,43 @@ public class Serveur {
 				 * rasesmbler
 				 */
 
-				
 				System.out.println("Etap 2 ");
-				
+
 				fos = new FileOutputStream(FILE_TO_RECEIVED);
 				bos = new BufferedOutputStream(fos);
-				
+
 				for (Tram trame : listTrames) {
 
-					bos.write(trame.tabOct, 0, trame.tabOct.length ); // ecrire  les 5 bytes de la trame i  ( ou moins pour la derniere)  dans bos
-				    bos.flush();
-					System.out.println("trame n° "+trame.id +" du ficier : "+ FILE_TO_RECEIVED
-							+ " downloaded ("+trame.tabOct.length+ "bytes read)");
+					bos.write(trame.tabOct, 0, trame.tabOct.length); // ecrire
+																		// les 5
+																		// bytes
+																		// de la
+																		// trame
+																		// i (
+																		// ou
+																		// moins
+																		// pour
+																		// la
+																		// derniere)
+																		// dans
+																		// bos
+					bos.flush();
+					System.out.println("trame nÂ° " + trame.id + " du ficier : "
+							+ FILE_TO_RECEIVED + " downloaded ("
+							+ trame.tabOct.length + "bytes read)");
 
 				}
 
-				
-				
 				/*
-				 * // imprimer le texte reï¿½u try { while (true) { String message
+				 * // imprimer le texte recu try { while (true) { String message
 				 * = input.readLine(); if (message == null) break;
 				 * System.out.println(message); } } catch (IOException e) {
 				 * System.out.println(e); }
 				 */
-				// connexion fermï¿½e par client
+				// connexion fermee par client
 				try {
 					socket.close();
-					System.out.println("connexion fermï¿½e par le client");
+					System.out.println("connexion fermee par le client");
 				} catch (IOException e) {
 					System.out.println(e);
 				}

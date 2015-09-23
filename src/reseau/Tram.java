@@ -21,6 +21,9 @@ public class Tram implements Serializable{
 		this.id = t.getId() ; 
 	}
 	
+	public Tram() {
+		// TODO Auto-generated constructor stub
+	}
 	public byte[] getTabOct() {
 		return tabOct;
 	}
