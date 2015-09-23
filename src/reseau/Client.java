@@ -13,7 +13,6 @@ import java.util.Timer;
  **/
 
 public class Client {
-	
 
 	public final static int SOCKET_PORT = 13267;
 	// public final static String FILE_TO_SEND =
@@ -172,24 +171,32 @@ public class Client {
 
 				try {
 					// recupere l'ACK //
-					ack = (Tram) ois.readObject(); // ca bloque ici !!!!!  
-					
+					try {
+						ack = (Tram) ois.readObject(); // ca bloque ici !!!!!
+					} catch (SocketTimeoutException ste) {
+						System.out.println("timout ! pas de reception d'ack pour la trame :"+trame.id);
+						oos.writeObject(trame);
+						// listTrames.add(trame.id-1 , trame); // Rajout de la meme trame
+						// deja envoyée au debut de
+						// tableau
+					}
 
 					System.out.println("Recption de l'ack n° :" + ack.getId());
 				} catch (ClassNotFoundException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				if (ack.equals(null) || ack.getId() != trame.id) { // si ack non
+		/*		if (ack.equals(null) || ack.getId() != trame.id) { // si ack non
 																	// recu ou
 																	// id
 																	// different
 																	// du bon !
-					
-					System.out.println("Ack non recu -> starting timer et sleep le thread actuel pour 1sec !!");
+
+					System.out
+							.println("Ack non recu -> starting timer et sleep le thread actuel pour 1sec !!");
 
 					try {
-						
+
 						// Creation d'un timer d'une sec d'une seconde qui
 						// renvoi la
 						// tram precedente si aucun ack n'est recu !
@@ -215,41 +222,47 @@ public class Client {
 										e.printStackTrace();
 									}
 
-									System.out.println("\nDANS le RUN Recption de l'ack n° :"
-											+ ackInTimer.getId());
+									System.out
+											.println("\nDANS le RUN Recption de l'ack n° :"
+													+ ackInTimer.getId());
 								} catch (ClassNotFoundException e) {
 									// TODO Auto-generated catch block
 									e.printStackTrace();
 								}
-								
-								
-								if ( ackInTimer.getId() == trame.id) { // si ack recu
+
+								if (ackInTimer.getId() == trame.id) { // si ack
+																		// recu
 									timer.cancel();
-									recu = true ;
+									recu = true;
 								}
 							}
 						}, 0, 1000);
 
-						
-						Thread.sleep(3000); // Timer  = Attendre 3 seconde avant de
+						Thread.sleep(3000); // Timer = Attendre 3 seconde avant
+											// de
 											// continuer
-						if (recu) Thread.currentThread().interrupt(); // break the sleep si un ack est recu pendant les 3 sec
-						
-						
+						if (recu)
+							Thread.currentThread().interrupt(); // break the
+																// sleep si un
+																// ack est recu
+																// pendant les 3
+																// sec
+
 					} catch (InterruptedException ex) {
 						Thread.currentThread().interrupt();
 					}
 
-					
 					// FIN DU TIMOUT
-					
+
 					System.out.println("Fin du timer de 3 sec !!\n");
-					if(!recu){
-						listTrames.add(0, trame); // Rajout de la meme trame deja envoyée au debut de tableau 
+					if (!recu) {
+						listTrames.add(0, trame); // Rajout de la meme trame
+													// deja envoyée au debut de
+													// tableau
 					}
 
 				}
-
+*/
 			}
 			oos.flush();
 

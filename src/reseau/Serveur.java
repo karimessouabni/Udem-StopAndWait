@@ -135,7 +135,7 @@ public class Serveur {
 										e.printStackTrace();
 									}
 								}
-							}, 11000);
+							}, 15000);
 
 							// try {
 							// // Thread.sleep(2000); // Attente de 2 sec ->
