@@ -169,6 +169,7 @@ public class Serveur {
 				 * System.out.println(message); } } catch (IOException e) {
 				 * System.out.println(e); }
 				 */
+				
 				// connexion fermee par client
 				try {
 					socket.close();

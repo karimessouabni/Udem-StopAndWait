@@ -228,20 +228,24 @@ public class Client {
 		}
 
 		// Envoi de message texte au serveur
-		/*
-		 * try { // les echanges avec le socket serveur se font e travers impout
-		 * et // output input = new BufferedReader(new
-		 * InputStreamReader(System.in)); output = new
-		 * PrintWriter(socket.getOutputStream(), true);
-		 * 
-		 * // on envoi le message insere sur console while (true) { lineToBeSent
-		 * = input.readLine();
-		 * 
-		 * // arret si ligne= "." if (lineToBeSent.equals(".")) { break; }
-		 * output.println(lineToBeSent); } } catch (IOException e) {
-		 * System.out.println(e); }
-		 */
+		
+
+		  try { // les echanges avec le socket serveur se font e travers impout et output
+			  input = new BufferedReader(new InputStreamReader(System.in)); output = new
+		  PrintWriter(socket.getOutputStream(), true);
+		 
+		  // on envoi le message insere sur console 
+		  while (true) {
+			  lineToBeSent= input.readLine();
+		  
+		  // arret si ligne= "." 
+		  if (lineToBeSent.equals(".")) { break; }
+		  output.println(lineToBeSent); } 
+		  } catch (IOException e) {
+		  System.out.println(e); }
+		 
 		try {
+			
 			System.out.println("fermeture de connexion avec le serveur "
 					+ socket.getInetAddress() + ":" + socket.getPort());
 			socket.close();
