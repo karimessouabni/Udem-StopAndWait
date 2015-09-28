@@ -24,8 +24,7 @@ public class Serveur {
 
 	private static final int FILE_SIZE = 6022386;
 
-	// public final static String FILE_TO_RECEIVED =
-	// "\\Users\\Enis\\Desktop\\Sourcetelechargee.txt";
+	// public final static String FILE_TO_RECEIVED ="\\Users\\Enis\\Desktop\\Sourcetelechargee.txt";
 	public final static String FILE_TO_RECEIVED = "/Users/karim/Desktop/Sourcetelechargee.txt";
 
 	public static void main(String args[]) {
@@ -33,7 +32,8 @@ public class Serveur {
 		FileOutputStream fos = null;
 		BufferedOutputStream bos = null;
 		int bytesRead;
-		int current = 0;
+		int current = 0; 
+		int varInc = 0 ;  // A decrementer pour simuler la perte de la meme trame pour son deuxiem envoi	
 
 		int port = 1500;
 		ServerSocket socket_serveur;
@@ -66,34 +66,6 @@ public class Serveur {
 						+ socket.getInetAddress() + ":" + socket.getPort());
 				input = new BufferedReader(new InputStreamReader(
 						socket.getInputStream()));
-				// timeout a 1000
-			
-
-				// Reception d'un Fichier
-				/*
-				 * try {
-				 * 
-				 * byte[] mybytearray = new byte[FILE_SIZE]; InputStream is; is
-				 * = socket.getInputStream();
-				 * 
-				 * fos = new FileOutputStream(FILE_TO_RECEIVED); bos = new
-				 * BufferedOutputStream(fos); bytesRead = is.read(mybytearray,
-				 * 0, mybytearray.length); current = bytesRead;
-				 * 
-				 * bos.write(mybytearray, 0, current);
-				 * System.out.println("File " + FILE_TO_RECEIVED +
-				 * " downloaded (  bytes read)"); bos.flush();
-				 * 
-				 * 
-				 * // } // else out = new PrintWriter(socket.getOutputStream());
-				 * //
-				 * out.println(" \t=== Evnoi de tram reussie ! ("+current+" octets)"
-				 * ); // out.flush();
-				 * 
-				 * } catch (IOException e1) { // TODO Auto-generated catch block
-				 * e1.printStackTrace(); }
-				 */
-
 				/*
 				 * 
 				 * Reception des Trames envoyées par le client 1 Rassembler le
@@ -106,13 +78,35 @@ public class Serveur {
 							socket.getInputStream());
 					ObjectOutputStream oos = new ObjectOutputStream(
 							socket.getOutputStream());
-					String str;
 					Tram trame;
 					Tram ack;
 
 					while ((trame = (Tram) ois.readObject()) != null) {
-						System.out.println("\n id Trame recu = " + trame.id);
-						listTrames.add(trame);
+						System.out.print("trame n° " + trame.id + " du fichier : "
+								+ FILE_TO_RECEIVED + " telechargée  ("
+								+ trame.tabOct.length + "bytes read)");
+						
+						if(!listTrames.isEmpty()){ // si ce n'est pas la premiere trame
+							if (listTrames.get(listTrames.size()-1).id == trame.id-1  ){ // si c'est la trame qui suit celle recue prealabment
+								System.out.println(" <= Données acceptées ");
+								listTrames.add(trame);
+								
+							}else {
+								System.out.println(" <= Données refusées ");
+							}
+							
+						}
+						else {
+							if( trame.id==0){
+								System.out.println(" <= Données acceptées ");
+								listTrames.add(trame);
+							}else {
+								System.out.println(" <= Données refusées ");
+							}
+							
+						}
+						
+						// Données acceptées ou refusées il faut envoyer un ACK !!! 
 
 						// envoie ACK //
 						ack = new Tram(null, trame.id);// Envoi une trame vide
@@ -120,38 +114,12 @@ public class Serveur {
 														// l'id de la trame
 														// d'avant
 						Timer timer = new Timer();
-						if (ack.id == 6) {
-
-							timer.schedule(new TimerTask() {
-								@Override
-								public void run() {
-									try {
-										Tram ack = new Tram(null, 6);
-										System.out
-												.println("\nEnvoie de l'ack 6");
-										oos.writeObject(ack);
-									} catch (IOException e) {
-										// TODO Auto-generated catch block
-										e.printStackTrace();
-									}
-								}
-							}, 15000);
-
-							// try {
-							// // Thread.sleep(2000); // Attente de 2 sec ->
-							// avant la fin du timer
-							// // Thread.sleep(4000); // Attente de 4 sec ->
-							// apres la fin de timer -> renvoi !!!!
-							// oos.writeObject(ack);
-							// } catch (InterruptedException ex) {
-							// Thread.currentThread().interrupt();
-							// }
-							// Envoi de l'ack apres 2 secondes
+						if (ack.id == 2 && varInc == 0 ) {
+							varInc++ ; 
 
 						} else {
 							oos.writeObject(ack);
-							// ack.setTabOct("OK".getBytes()); // Pourquoi faire
-							// ??
+							System.out.println("Envoi de l'ack pour la trame "+trame.id);
 						}
 
 						if (trame.id == 8)
@@ -191,9 +159,7 @@ public class Serveur {
 																		// dans
 																		// bos
 					bos.flush();
-					System.out.println("trame n° " + trame.id + " du ficier : "
-							+ FILE_TO_RECEIVED + " downloaded ("
-							+ trame.tabOct.length + "bytes read)");
+					
 
 				}
 

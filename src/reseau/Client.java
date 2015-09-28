@@ -15,8 +15,7 @@ import java.util.Timer;
 public class Client {
 
 	public final static int SOCKET_PORT = 13267;
-	// public final static String FILE_TO_SEND =
-	// "\\Users\\Enis\\Desktop\\source.txt";
+	// public final static String FILE_TO_SEND ="\\Users\\Enis\\Desktop\\source.txt";
 	public final static String FILE_TO_SEND = "/Users/karim/Desktop/source.txt";
 	protected static boolean recu;
 
@@ -29,6 +28,7 @@ public class Client {
 
 		// port et adresse
 		int port = 1500;
+		int varInc = 0;
 		InetAddress adresse = null;
 
 		// socket
@@ -79,9 +79,11 @@ public class Client {
 					+ adresse.getHostAddress() + ":" + port
 					+ ", veuillez patienter...");
 			socket = new Socket(adresse, port);
+
 			socket.setSoTimeout(10000); // Time out set to 10 seconds
+
 			System.out.println("connecte au serveur " + socket.getInetAddress()
-					+ ":" + socket.getPort() + ": inserer du texte e envoyer");
+					+ ":" + socket.getPort() + ": inserer du texte a envoyer");
 
 		} catch (UnknownHostException e) {
 			System.out.println("\nServeur " + adresse + ":" + port
@@ -147,7 +149,7 @@ public class Client {
 				listTrames.add(trame);
 			}
 
-			System.out.println(" la taille de la liste des trams a envoyé = "
+			System.out.println(" la taille de la liste des trams a envoyer = "
 					+ listTrames.size());
 
 			/*
@@ -161,115 +163,54 @@ public class Client {
 					socket.getOutputStream());
 			ObjectInputStream ois = new ObjectInputStream(
 					socket.getInputStream());
-			for (Tram trame : listTrames) {
+			for (int i = 0; i < listTrames.size(); i++) {
 
 				// Envoi de la tram
-				oos.writeObject(trame);
-				System.out.println("Envoie de la trame id = " + trame.id);
+				if (listTrames.get(i).id == 5 && varInc == 0) {
+					varInc++;
+					System.out.println("la trame 5 n'a pas ete envoyée !");
+				}else {
+					oos.writeObject(listTrames.get(i));
+					System.out.println("Envoi de la trame id = "
+							+ listTrames.get(i).id);
+				}
 
 				// Reception de l'ack
 
 				try {
 					// recupere l'ACK //
 					try {
-						ack = (Tram) ois.readObject(); // ca bloque ici !!!!!
+						ack = (Tram) ois.readObject(); // si c timout l'ack
+														// contiendera toujours
+														// l'ack de la trame
+														// precedente
 					} catch (SocketTimeoutException ste) {
-						System.out.println("timout ! pas de reception d'ack pour la trame :"+trame.id);
-						oos.writeObject(trame);
-						// listTrames.add(trame.id-1 , trame); // Rajout de la meme trame
-						// deja envoyée au debut de
-						// tableau
+						System.out
+								.println("timout 10000ms! pas de reception d'ack pour la trame :"
+										+ listTrames.get(i).id);
 					}
-
-					System.out.println("Recption de l'ack n° :" + ack.getId());
+					if (ack.getId() == listTrames.get(i).id) // soit timOut soit
+																// le serveur a
+																// envoyer un
+																// faux ack
+						System.out.println("Recption de l'ack n° :"
+								+ ack.getId());
+					else {
+						System.out
+								.println("l'ack de la trame n° : "
+										+ listTrames.get(i).id
+										+ " n'a pas ete recu !!! \n Renvoi de la trame: "
+										+ listTrames.get(i).id);
+						i--;
+					}
 				} catch (ClassNotFoundException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-		/*		if (ack.equals(null) || ack.getId() != trame.id) { // si ack non
-																	// recu ou
-																	// id
-																	// different
-																	// du bon !
-
-					System.out
-							.println("Ack non recu -> starting timer et sleep le thread actuel pour 1sec !!");
-
-					try {
-
-						// Creation d'un timer d'une sec d'une seconde qui
-						// renvoi la
-						// tram precedente si aucun ack n'est recu !
-						Timer timer = new Timer();
-						timer.scheduleAtFixedRate(new TimerTask() {
-							@Override
-							public void run() {
-								// Code a executer apres 1 sec et qui se repeter
-								// toutes les 1s
-
-								System.out.println("Attente 3 sec \n");
-								// Checker toutes les 500ms et avant d'arriver
-								// au timout( renvois de tram)
-								// si on a recu un ack ou toujours non !!
-
-								// Reception de l'ack
-								Tram ackInTimer = null;
-								try {
-									try {
-										ackInTimer = (Tram) ois.readObject();
-									} catch (IOException e) {
-										// TODO Auto-generated catch block
-										e.printStackTrace();
-									}
-
-									System.out
-											.println("\nDANS le RUN Recption de l'ack n° :"
-													+ ackInTimer.getId());
-								} catch (ClassNotFoundException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
-
-								if (ackInTimer.getId() == trame.id) { // si ack
-																		// recu
-									timer.cancel();
-									recu = true;
-								}
-							}
-						}, 0, 1000);
-
-						Thread.sleep(3000); // Timer = Attendre 3 seconde avant
-											// de
-											// continuer
-						if (recu)
-							Thread.currentThread().interrupt(); // break the
-																// sleep si un
-																// ack est recu
-																// pendant les 3
-																// sec
-
-					} catch (InterruptedException ex) {
-						Thread.currentThread().interrupt();
-					}
-
-					// FIN DU TIMOUT
-
-					System.out.println("Fin du timer de 3 sec !!\n");
-					if (!recu) {
-						listTrames.add(0, trame); // Rajout de la meme trame
-													// deja envoyée au debut de
-													// tableau
-					}
-
-				}
-*/
+				
 			}
 			oos.flush();
 
-			// Envoi message
-			// String str = "initialize";
-			// oos.writeObject(str);
-			// oos.flush();
 
 			System.out.println("Done.");
 
