@@ -2,6 +2,7 @@ package reseau;
 
 import java.net.*;
 import java.util.ArrayList;
+import java.util.Scanner;
 import java.util.TimerTask;
 import java.io.*;
 import java.util.Timer;
@@ -22,7 +23,22 @@ public class Client {
 	protected static boolean recu;
 
 	public static void main(String[] args) {
-		afficherMenu();
+		int numMenu = choixMenu();
+		switch (numMenu){
+		case 1 :
+			System.out.println("Vous avez cliquer sur 1 : Tester connexion au serveur");
+			
+			break ;
+		case 2 :
+			System.out.println("Vous avez cliquer sur 2");
+			break ; 
+		case 3 :
+			System.out.println("Vous avez cliquer sur 3");
+			break ; 
+		case 4 :
+			System.out.println("Vous avez cliquer sur 4");
+			break ; 
+		}
 
 		
 		
@@ -263,10 +279,12 @@ public class Client {
 		}
 	}
 
-	public static void afficherMenu() {
+	public static int choixMenu() {
 		System.out
 				.println("******Bienvenu*******\nMenu : \n1 : Tester connexion au serveur\n2 : Transférer un fichier vers le serveur\n3 : Lister le contenu du répertoire courant du serveur\n4 : Quitter l’application\n  Faite votre choix :");
 
+		Scanner s = new Scanner(System.in);
+		return s.nextInt() ; 
 	}
 
 }
