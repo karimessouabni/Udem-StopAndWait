@@ -15,12 +15,18 @@ import java.util.Timer;
 public class Client {
 
 	public final static int SOCKET_PORT = 13267;
-	// public final static String FILE_TO_SEND ="\\Users\\Enis\\Desktop\\source.txt";
-	public final static String FILE_TO_SEND = "/Users/karim/Desktop/source.txt";
+	// public final static String FILE_TO_SEND
+	// ="\\Users\\Enis\\Desktop\\source.txt"; // Pour windows
+	public final static String FILE_TO_SEND = "/Users/karim/Desktop/source.txt"; // pour
+																					// Mac
 	protected static boolean recu;
 
 	public static void main(String[] args) {
+		afficherMenu();
 
+		
+		
+		
 		// Pour envoyer le fichier
 		FileInputStream fis = null;
 		BufferedInputStream bis = null;
@@ -169,7 +175,7 @@ public class Client {
 				if (listTrames.get(i).id == 5 && varInc == 0) {
 					varInc++;
 					System.out.println("la trame 5 n'a pas ete envoyée !");
-				}else {
+				} else {
 					oos.writeObject(listTrames.get(i));
 					System.out.println("Envoi de la trame id = "
 							+ listTrames.get(i).id);
@@ -207,10 +213,9 @@ public class Client {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
+
 			}
 			oos.flush();
-
 
 			System.out.println("Done.");
 
@@ -228,24 +233,28 @@ public class Client {
 		}
 
 		// Envoi de message texte au serveur
-		
 
-		  try { // les echanges avec le socket serveur se font e travers impout et output
-			  input = new BufferedReader(new InputStreamReader(System.in)); output = new
-		  PrintWriter(socket.getOutputStream(), true);
-		 
-		  // on envoi le message insere sur console 
-		  while (true) {
-			  lineToBeSent= input.readLine();
-		  
-		  // arret si ligne= "." 
-		  if (lineToBeSent.equals(".")) { break; }
-		  output.println(lineToBeSent); } 
-		  } catch (IOException e) {
-		  System.out.println(e); }
-		 
+		try { // les echanges avec le socket serveur se font e travers impout et
+				// output
+			input = new BufferedReader(new InputStreamReader(System.in));
+			output = new PrintWriter(socket.getOutputStream(), true);
+
+			// on envoi le message insere sur console
+			while (true) {
+				lineToBeSent = input.readLine();
+
+				// arret si ligne= "."
+				if (lineToBeSent.equals(".")) {
+					break;
+				}
+				output.println(lineToBeSent);
+			}
+		} catch (IOException e) {
+			System.out.println(e);
+		}
+
 		try {
-			
+
 			System.out.println("fermeture de connexion avec le serveur "
 					+ socket.getInetAddress() + ":" + socket.getPort());
 			socket.close();
@@ -253,4 +262,11 @@ public class Client {
 			System.out.println(e);
 		}
 	}
+
+	public static void afficherMenu() {
+		System.out
+				.println("******Bienvenu*******\nMenu : \n1 : Tester connexion au serveur\n2 : Transférer un fichier vers le serveur\n3 : Lister le contenu du répertoire courant du serveur\n4 : Quitter l’application\n  Faite votre choix :");
+
+	}
+
 }
