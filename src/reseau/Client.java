@@ -238,7 +238,7 @@ public class Client {
 			socket.setSoTimeout(5000); // Time out set to 10 seconds
 
 		} catch (UnknownHostException e) {
-			System.out.println("\nServeur " + adrServ + ":" + port + " inconnu.");
+			System.out.println("\n Serveur " + adrServ + ":" + port + " inconnu.");
 			return; // Si serveur inconnu, la fonction arrete ici.
 		} catch (IOException e) {
 			System.out.println("connexion echouee, adresse/port incorrect");
@@ -246,9 +246,9 @@ public class Client {
 			System.exit(1);
 		}
 
-		// Reception du message de Bienvenu
-
 		
+	// Reception du message de Bienvenue
+	
 		Tram msgB = new Tram(null, -3);
 		ObjectInputStream ois = null;
 		try {
@@ -268,7 +268,7 @@ public class Client {
 							.println("timout 10000ms! pas de reception du message de bienvenue" );
 				}
 				if (! (msgB.id == -3)){
-					System.out.println("Recevoir bienvenue");
+					System.out.println("\n Recevoir bienvenue");
 					System.out.println("\t"+ socket.getInetAddress() + ":" + socket.getPort()
 							+ " Recu la transmission de la trame " + msgB.id + " (" + msgB.getTabOct().length + " octets)");
 					ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
@@ -278,7 +278,7 @@ public class Client {
 					+ " Acquittement de la transmission de la trame " + msgB.id);
 					System.out.println("\t"+ socket.getInetAddress() + ":" + socket.getPort()
 					+ " Accepte la transmission de la trame  " + msgB.id+ " (" + msgB.getTabOct().length + " octets)");
-					System.out.println(msgB); // Reception du message de bienvenu 
+					System.out.println("Message: "+msgB); // Reception du message de bienvenu 
 					oos.flush();
 					
 					break; 
@@ -293,14 +293,82 @@ public class Client {
 				e.printStackTrace();
 			}
 		}
+		
+	// Envoie message de fin //
+	System.out.println("\n Envoi du message de Fin")	;
+		ObjectOutputStream oos;
+		try {
+			oos = new ObjectOutputStream(socket.getOutputStream());
+			String msgFin = new String("Fin");
 
+			Tram msgFbyte = new Tram(msgFin.getBytes(), 0);
+			oos.writeObject(msgFbyte);
+			oos.flush();
+			System.out.println("\t"+ socket.getInetAddress() + ":" + socket.getPort()
+			+" Transmission de la trame "+msgFbyte.getId());
+			// Reception de l'ack
+			//int j = 0 ;  // pour tester la perte de trame 4 fois de suite 
+			Tram ack = new Tram(null, -2);
+			while (true) {
+				try {
+					// recupere l'ACK //
+					System.out.println("\t"+ socket.getInetAddress() + ":" + socket.getPort()
+					+" Activation du timeout 1000ms");// Dans le catch //
+					try {
+					
+						ois = new ObjectInputStream(socket.getInputStream());
+						ack = (Tram) ois.readObject(); // si c timout l'ack
+														// contiendera
+														// toujours
+														// l'ack de la trame
+														// precedente
+					
+					} catch (SocketTimeoutException ste) {
+						System.out.println("timout 1000ms! pas de reception d'ack ");
+					}
+					if (ack.getId() == msgFbyte.id) { // soit timOut soit
+														// le serveur a
+														// envoyer un
+														// faux ack
+						System.out.println("\t"+ socket.getInetAddress() + ":" + socket.getPort()
+					+" Recu acquittement de la transmission de trame n° :" + ack.getId());
+						break;
+					} else {
+					//	if(j==4){ // pour tester la perte de trame 4 fois de suite 
+							System.out.println("l'ack de la trame n° : " + msgFbyte.id
+									+ " n'a pas ete recu !!! \n Renvoi de la trame contenant le message de Fin: "
+									+ msgFbyte.id);
+							oos.writeObject(msgFbyte);
+							oos.flush();
+					//	}
+					//	j++;
+						
+
+					}
+				} catch (ClassNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+			}
+		
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		/*
+				
+
+		*
+		*/
 	}
 
 	public static void closeCnx() {
 		try {
 
 			System.out.println(
-					"fermeture de connexion avec le serveur " + socket.getInetAddress() + ":" + socket.getPort());
+					"\n fermeture de connexion avec le serveur " + socket.getInetAddress() + ":" + socket.getPort());
 			socket.close();
 		} catch (IOException e) {
 			System.out.println(e);

@@ -68,29 +68,33 @@ public class Serveur {
 				
 				socket.setSoTimeout(5000); // Time out set to 10 seconds
 				
-				System.out.println("nouvelle connexion acceptee " + socket.getInetAddress() + ":" + socket.getPort());
+				System.out.println("nouvelle connexion acceptee " + socket.getInetAddress() + ":" + socket.getPort()+"\n");
 				input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
 				// set Timout
 				//socket.setSoTimeout(10000);
 
-				// Envoi de message texte au client
+				
 
 				ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
 				//ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
-
+		// Envoie message de bienvenue au Client //
+				
 				String msgBienvenu = new String("Connexion réussie.  Bienvenue !");
 
 				Tram msgBbyte = new Tram(msgBienvenu.getBytes(), 0);
 				oos.writeObject(msgBbyte);
 				oos.flush();
-
+				System.out.println("\t"+ socket.getInetAddress() + ": " + socket.getPort()
+				+ "Transmission de la trame "+msgBbyte.getId());
 				// Reception de l'ack
 				//int j = 0 ;  // pour tester la perte de trame 4 fois de suite 
 				Tram ack = new Tram(null, -2);
 				while (true) {
 					try {
 						// recupere l'ACK //
+						System.out.println("\t"+ socket.getInetAddress() + ": " + socket.getPort()
+						+ "Activation du timeout 1000ms"); // Dans le catch //
 						try {
 						
 							ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
@@ -99,7 +103,7 @@ public class Serveur {
 															// toujours
 															// l'ack de la trame
 															// precedente
-							System.out.println("ici");
+							
 						} catch (SocketTimeoutException ste) {
 							System.out.println("timout 1000ms! pas de reception d'ack ");
 						}
@@ -107,7 +111,8 @@ public class Serveur {
 															// le serveur a
 															// envoyer un
 															// faux ack
-							System.out.println("Recption de l'ack n° :" + ack.getId());
+							System.out.println("\t"+ socket.getInetAddress() + ":" + socket.getPort()
+							+ " Recu acquittement de la transmission de trame n° : " + ack.getId());
 							break;
 						} else {
 						//	if(j==4){ // pour tester la perte de trame 4 fois de suite 
@@ -126,6 +131,54 @@ public class Serveur {
 						e.printStackTrace();
 					}
 
+				}
+			
+				
+			// Reception du message de Fin
+				
+				Tram msgF = new Tram(null, -3);
+				ObjectInputStream ois = null;
+				try {
+					ois = new ObjectInputStream(socket.getInputStream());
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				
+				while (true) {
+					try {
+						
+						try {
+							msgF = (Tram) ois.readObject();
+						} catch (SocketTimeoutException ste) {
+							System.out
+									.println("timout 10000ms! pas de reception du message de bienvenue" );
+						}
+						if (! (msgF.id == -3)){
+							System.out.println("\n Recevoir Fin");
+							System.out.println("\t"+ socket.getInetAddress() + ":" + socket.getPort()
+									+ " Recu la transmission de la trame " + msgF.id + " (" + msgF.getTabOct().length + " octets)");
+							oos = new ObjectOutputStream(socket.getOutputStream());
+							Tram ackBvn = new Tram(null, msgF.id);
+							oos.writeObject(ackBvn);
+							System.out.println("\t"+ socket.getInetAddress() + ":" + socket.getPort()
+							+ " Acquittement de la transmission de la trame " + msgF.id);
+							System.out.println("\t"+ socket.getInetAddress() + ":" + socket.getPort()
+							+ " Accepte la transmission de la trame  " + msgF.id+ " (" + msgF.getTabOct().length + " octets)");
+							System.out.println("message: "+msgF); // Reception du message de bienvenu 
+							oos.flush();
+							
+							break; 
+						}
+
+
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (ClassNotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 
 				/*
@@ -206,7 +259,7 @@ public class Serveur {
 				// connexion fermee par client
 				try {
 					socket.close();
-					System.out.println("connexion fermee par le client");
+					System.out.println("\n connexion fermee par le client");
 				} catch (IOException e) {
 					System.out.println(e);
 				}
