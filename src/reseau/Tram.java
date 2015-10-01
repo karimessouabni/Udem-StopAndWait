@@ -1,6 +1,7 @@
 package reseau;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 public class Tram implements Serializable{
 
@@ -48,5 +49,11 @@ public class Tram implements Serializable{
 		this.id = t.getId();
 		this.tabOct = t.getTabOct();
 	}
+	@Override
+	public String toString() {
+		return new String(this.tabOct);
+	}
+	
+	
 	
 }
