@@ -20,13 +20,14 @@ import java.io.*;
  * l'application avec ctrl+C
  **/
 
-public class Serveur {
+public class Serveur extends Transfer {
 
 	private static final int FILE_SIZE = 6022386;
+	// socket
+		public static Socket socket = null;
 
-	public final static String FILE_TO_RECEIVED = "\\Users\\Enis\\Desktop\\Sourcetelechargee.txt";
-	// public final static String FILE_TO_RECEIVED =
-	// "/Users/karim/Desktop/Sourcetelechargee.txt";
+//	public final static String FILE_TO_RECEIVED = "\\Users\\Enis\\Desktop\\Sourcetelechargee.txt";
+	 public final static String FILE_TO_RECEIVED ="/Users/karim/Desktop/Sourcetelechargee.txt";
 
 	public static void main(String args[]) {
 
@@ -64,7 +65,7 @@ public class Serveur {
 
 			// boucle infinie: traitement d'une connexion client
 			while (true) {
-				Socket socket = socket_serveur.accept();
+				 socket = socket_serveur.accept();
 				
 				socket.setSoTimeout(5000); // Time out set to 10 seconds
 				
@@ -76,11 +77,16 @@ public class Serveur {
 
 				
 
+				
+				
+				
+				//Envoie message de bienvenue au Client //
+				
 				ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
 				//ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
-		// Envoie message de bienvenue au Client //
 				
-				String msgBienvenu = new String("Connexion réussie.  Bienvenue !");
+				
+				String msgBienvenu = new String("Connexion reussie.  Bienvenue !");
 
 				Tram msgBbyte = new Tram(msgBienvenu.getBytes(), 0);
 				oos.writeObject(msgBbyte);
@@ -112,17 +118,17 @@ public class Serveur {
 															// envoyer un
 															// faux ack
 							System.out.println("\t"+ socket.getInetAddress() + ":" + socket.getPort()
-							+ " Recu acquittement de la transmission de trame n° : " + ack.getId());
+							+ " Recu acquittement de la transmission de trame nï¿½ : " + ack.getId());
 							break;
 						} else {
-						//	if(j==4){ // pour tester la perte de trame 4 fois de suite 
-								System.out.println("l'ack de la trame n° : " + msgBbyte.id
+//							if(j==4){ // pour tester la perte de trame 4 fois de suite 
+								System.out.println("l'ack de la trame nï¿½ : " + msgBbyte.id
 										+ " n'a pas ete recu !!! \n Renvoi de la trame contenant le message de bienvenue: "
 										+ msgBbyte.id);
 								oos.writeObject(msgBbyte);
 								oos.flush();
-						//	}
-						//	j++;
+//							}
+//							j++;
 							
 
 						}
@@ -133,6 +139,7 @@ public class Serveur {
 
 				}
 			
+		
 				
 			// Reception du message de Fin
 				
