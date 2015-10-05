@@ -20,14 +20,16 @@ import java.io.*;
  * l'application avec ctrl+C
  **/
 
-public class Serveur extends Transfer {
+public class Serveur {
 
 	private static final int FILE_SIZE = 6022386;
 	// socket
 		public static Socket socket = null;
 
 //	public final static String FILE_TO_RECEIVED = "\\Users\\Enis\\Desktop\\Sourcetelechargee.txt";
-	 public final static String FILE_TO_RECEIVED ="/Users/karim/Desktop/Sourcetelechargee.txt";
+	public final static String FOLD_SERVER = "\\Users\\Enis\\Desktop"; 
+	public final static String FILE_TO_RECEIVED ="/Users/karim/Desktop/Sourcetelechargee.txt";
+//	public final static String FILE_TO_RECEIVED ="/Users/karim/Desktop/Sourcetelechargee.txt";
 
 	public static void main(String args[]) {
 
@@ -178,7 +180,6 @@ public class Serveur extends Transfer {
 							break; 
 						}
 
-
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -187,7 +188,9 @@ public class Serveur extends Transfer {
 						e.printStackTrace();
 					}
 				}
-
+					
+				
+				
 				/*
 				 * 
 				 * Reception des Trames envoyées par le client 1 Rassembler le
@@ -262,7 +265,117 @@ public class Serveur extends Transfer {
 				 * System.out.println(message); } } catch (IOException e) {
 				 * System.out.println(e); }
 				 */
+				
+				// Reception du message dir
+	/*				
+					Tram msgDir = new Tram(null, -3);
+					
+					try {
+						ois = new ObjectInputStream(socket.getInputStream());
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					
+					while (true) {
+						try {
+							
+							try {
+								msgDir = (Tram) ois.readObject();
+							} catch (SocketTimeoutException ste) {
+								System.out
+										.println("timout 10000ms! pas de reception du message dir" );
+							}
+							if (! (msgDir.id == -3)){
+								System.out.println("\n Recevoir Fin");
+								System.out.println("\t"+ socket.getInetAddress() + ":" + socket.getPort()
+										+ " Recu la transmission de la trame " + msgDir.id + " (" + msgDir.getTabOct().length + " octets)");
+								oos = new ObjectOutputStream(socket.getOutputStream());
+								Tram ackBvn = new Tram(null, msgDir.id);
+								oos.writeObject(ackBvn);
+								System.out.println("\t"+ socket.getInetAddress() + ":" + socket.getPort()
+								+ " Acquittement de la transmission de la trame " + msgDir.id);
+								System.out.println("\t"+ socket.getInetAddress() + ":" + socket.getPort()
+								+ " Accepte la transmission de la trame  " + msgDir.id+ " (" + msgDir.getTabOct().length + " octets)");
+								System.out.println("message: "+msgDir); // Reception du message de bienvenu 
+								oos.flush();
+								
+								break; 
+							}
 
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (ClassNotFoundException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				
+					//Envoie liste au Client //
+					
+					oos = new ObjectOutputStream(socket.getOutputStream());
+					//ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+					File f = new File(FOLD_SERVER);
+					String msg = new String("Liste");
+					String[] l = f.list();
+					for (int i=0; i<l.length; i++)
+					{
+						msg = msg.concat("\n"+l[i]);
+					}
+
+					Tram msgbyte = new Tram(msg.getBytes(), 0);
+					oos.writeObject(msgbyte);
+					oos.flush();
+					System.out.println("\t"+ socket.getInetAddress() + ": " + socket.getPort()
+					+ "Transmission de la trame "+msgbyte.getId());
+					// Reception de l'ack
+					//int j = 0 ;  // pour tester la perte de trame 4 fois de suite 
+					ack = new Tram(null, -2);
+					while (true) {
+						try {
+							// recupere l'ACK //
+							System.out.println("\t"+ socket.getInetAddress() + ": " + socket.getPort()
+							+ "Activation du timeout 1000ms"); // Dans le catch //
+							try {
+							
+								ois = new ObjectInputStream(socket.getInputStream());
+								ack = (Tram) ois.readObject(); // si c timout l'ack
+																// contiendera
+																// toujours
+																// l'ack de la trame
+																// precedente
+								
+							} catch (SocketTimeoutException ste) {
+								System.out.println("timout 1000ms! pas de reception d'ack ");
+							}
+							if (ack.getId() == msgbyte.id) { // soit timOut soit
+																// le serveur a
+																// envoyer un
+																// faux ack
+								System.out.println("\t"+ socket.getInetAddress() + ":" + socket.getPort()
+								+ " Recu acquittement de la transmission de trame n� : " + ack.getId());
+								break;
+							} else {
+//								if(j==4){ // pour tester la perte de trame 4 fois de suite 
+									System.out.println("l'ack de la trame n� : " + msgbyte.id
+											+ " n'a pas ete recu !!! \n Renvoi de la trame contenant le message: "
+											+ msgbyte.id);
+									oos.writeObject(msgbyte);
+									oos.flush();
+//								}
+//								j++;
+								
+
+							}
+						} catch (ClassNotFoundException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+
+					}
+					
+				*/	
 				// connexion fermee par client
 				try {
 					socket.close();
@@ -270,9 +383,10 @@ public class Serveur extends Transfer {
 				} catch (IOException e) {
 					System.out.println(e);
 				}
-			}
+			
 
-		} catch (IOException e) {
+		} 
+			}catch (IOException e) {
 			System.out.println(e);
 		}
 	}

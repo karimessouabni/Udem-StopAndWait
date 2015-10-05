@@ -13,7 +13,7 @@ import java.util.Timer;
  * "entrer" pour l'envoyer au serveur quitter l'application en tapant "."
  **/
 
-public class Client extends Transfer {
+public class Client {
 
 	public final static int SOCKET_PORT = 13267;
 	// Pour envoyer le fichier
@@ -63,20 +63,21 @@ public class Client extends Transfer {
 			 */
 			Client.simLoseAck = false;
 			testCnx();
-			closeCnx();
-
+			
 			break;
 		case 2:
-			testCnx();
+		//	testCnx();
 			break;
 		case 3:
-			testCnx();
+			liste();
 			break;
 		case 4:
+			//testCnx();
+			
 			break;
 		case 5:
 			Client.simLoseAck = true;
-			testCnx();
+		//	testCnx();
 			closeCnx();
 			break;
 
@@ -235,7 +236,7 @@ public class Client extends Transfer {
 		return new Scanner(System.in).nextInt();
 	}
 
-	public static void testCnx() {
+	public static void liste() {
 
 		System.out.print("Donnez l'adresse du serveur : ");
 		String adrServ = new Scanner(System.in).nextLine();
@@ -440,6 +441,177 @@ public class Client extends Transfer {
 		} catch (IOException e) { // TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		// Envoie message dir //
+				System.out.println("\n Envoi du message de dir");
+				
+				try {
+					oos = new ObjectOutputStream(
+							socket.getOutputStream());
+					String msg = new String("dir");
+					
+					Tram msgbyte = new Tram(msg.getBytes(), 0);
+					oos.writeObject(msgbyte);
+					oos.flush();
+					System.out.println("\t" + socket.getInetAddress() + ":"
+							+ socket.getPort() + " Transmission de la trame "
+							+ msgbyte.getId()); // Reception del'ack //
+					//int j = 0; // pour tester la perte de trame 4 fois de suite
+					Tram ack = new Tram(null, -2);
+					while (true) {
+						try {
+							// recupere l'ACK
+							System.out.println("\t" + socket.getInetAddress() + ":"
+									+ socket.getPort()
+									+ " Activation du timeout 1000ms");// Dans le catch
+
+							try {
+
+								if(!Client.simLoseAck) ois = new ObjectInputStream(socket.getInputStream());
+								ack = (Tram) ois.readObject(); // si c timout l'ack //
+																// contiendera //
+																// toujours //l'ack de
+																// la trame //
+																// precedente
+
+							} catch (SocketTimeoutException ste) {
+								System.out
+										.println("timout 1000ms! pas de reception d'ack ");
+							}
+							if (ack.getId() == msgbyte.id) { // soit timOut soit // le
+																// serveur a // envoyer
+																// un
+								// faux ack
+								System.out
+										.println("\t"
+												+ socket.getInetAddress()
+												+ ":"
+												+ socket.getPort()
+												+ " Recu acquittement de la transmission de trame n° :"
+												+ ack.getId());
+								break;
+							} else { //
+								//if (j == 4) { // pour tester la perte de trame 4 fois de
+												// suite
+									System.out
+											.println("l'ack de la trame n° : "
+													+ msgbyte.id
+													+ " n'a pas ete recu !!! \n Renvoi de la trame contenant le message de Fin: "
+													+ msgbyte.id);
+									oos.writeObject(msgbyte);
+									oos.flush();
+								//}
+								// j++;
+
+							}
+
+						} catch (ClassNotFoundException e) { // TODO Auto-generated
+																// catch block
+							e.printStackTrace();
+						}
+
+					}
+
+				} catch (IOException e) { // TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			
+			// Reception message liste //
+				
+
+				msgRecu = false;
+				Tram msg = new Tram(null, -3);
+				ois = null;
+				try {
+					ois = new ObjectInputStream(socket.getInputStream());
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+
+				a = 0;
+				while (true) {
+					if (simLoseAck)
+						a++;
+					try {
+
+						try {
+							msg = (Tram) ois.readObject();
+						} catch (SocketTimeoutException ste) {
+							System.out
+									.println("timout 10000ms! pas de reception du message de bienvenue");
+						}
+						if (!(msg.id == -3)) {
+							System.out.println("\n Recevoir bienvenue");
+							System.out.println("\t" + socket.getInetAddress() + ":"
+									+ socket.getPort()
+									+ " Recu la transmission de la trame " + msg.id
+									+ " (" + msg.getTabOct().length + " octets)");
+
+							if (msgRecu == false) {
+
+								// msgRecu = true; // refuser la reception si meme
+								// mesage
+								// recu suite a un pb d'ack
+
+								oos = new ObjectOutputStream(
+										socket.getOutputStream());
+								Tram ackBvn = new Tram(null, msg.id);
+								if (a == 2)
+									oos.writeObject(ackBvn); // simulation de la perte
+																// de l'ack du bienvenue
+																// => cmnt!!
+								else if (!simLoseAck && a == 0)
+									oos.writeObject(ackBvn);
+								// et si LoseAck = true && a=1 on n'envois pas d'ack
+								// afin de simuler la perte de ce dernier !!
+								if (a == 0 || a == 2)
+									System.out
+											.println("\t"
+													+ socket.getInetAddress()
+													+ ":"
+													+ socket.getPort()
+													+ " Acquittement de la transmission de la trame "
+													+ msg.id);
+								if (a == 2) {
+									System.out
+											.println("\t"
+													+ socket.getInetAddress()
+													+ ":"
+													+ socket.getPort()
+													+ " Reffus de la transmission de la trame  "
+													+ msg.id + " ("
+													+ msg.getTabOct().length
+													+ " octets)");
+								} else {
+									System.out.println("\t" + socket.getInetAddress()
+											+ ":" + socket.getPort()
+											+ " Accepte la transmission de la trame  "
+											+ msg.id + " (" + msg.getTabOct().length
+											+ " octets)");
+									System.out.println("Message: " + msg); // Reception
+																			// du
+																			// message
+																			// de
+																			// bienvenu
+								}
+
+								if (a == 0 || a == 2)
+									break;
+
+								oos.flush();
+							}
+
+						}
+
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (ClassNotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}	
+
 
 	}
 
@@ -453,5 +625,217 @@ public class Client extends Transfer {
 			System.out.println(e);
 		}
 	}
+	
+	public static void testCnx()
+	{
+		System.out.print("Donnez l'adresse du serveur : ");
+		String adrServ = new Scanner(System.in).nextLine();
+		InetAddress adresse = null;
+		try {
+			adresse = InetAddress.getByName(adrServ);
+		} catch (UnknownHostException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
+		System.out.print("\nDonnez le port du serveur : ");
+		int port = new Scanner(System.in).nextInt();
+
+		System.out
+				.println("\n\nTest de connexion \n \nEtablissement de connexion avec le serveur"
+						+ adrServ + ":" + port);
+
+		// connexion au serveur
+		try {
+			System.out.println("Serveur  " + adresse.getHostAddress() + ":"
+					+ port + " est maintenant connecté");
+			socket = new Socket(adrServ, port);
+
+			socket.setSoTimeout(5000); // Time out set to 10 seconds
+
+		} catch (UnknownHostException e) {
+			System.out.println("\n Serveur " + adrServ + ":" + port
+					+ " inconnu.");
+			return; // Si serveur inconnu, la fonction arrete ici.
+		} catch (IOException e) {
+			System.out.println("connexion echouee, adresse/port incorrect");
+			// erreur, on quitte
+			System.exit(1);
+		}
+
+		// Reception du message de Bienvenue
+
+		boolean msgRecu = false;
+		Tram msgB = new Tram(null, -3);
+		ObjectInputStream ois = null;
+		try {
+			ois = new ObjectInputStream(socket.getInputStream());
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
+		int a = 0;
+		while (true) {
+			if (simLoseAck)
+				a++;
+			try {
+
+				try {
+					msgB = (Tram) ois.readObject();
+				} catch (SocketTimeoutException ste) {
+					System.out
+							.println("timout 10000ms! pas de reception du message de bienvenue");
+				}
+				if (!(msgB.id == -3)) {
+					System.out.println("\n Recevoir bienvenue");
+					System.out.println("\t" + socket.getInetAddress() + ":"
+							+ socket.getPort()
+							+ " Recu la transmission de la trame " + msgB.id
+							+ " (" + msgB.getTabOct().length + " octets)");
+
+					if (msgRecu == false) {
+
+						// msgRecu = true; // refuser la reception si meme
+						// mesage
+						// recu suite a un pb d'ack
+
+						ObjectOutputStream oos = new ObjectOutputStream(
+								socket.getOutputStream());
+						Tram ackBvn = new Tram(null, msgB.id);
+						if (a == 2)
+							oos.writeObject(ackBvn); // simulation de la perte
+														// de l'ack du bienvenue
+														// => cmnt!!
+						else if (!simLoseAck && a == 0)
+							oos.writeObject(ackBvn);
+						// et si LoseAck = true && a=1 on n'envois pas d'ack
+						// afin de simuler la perte de ce dernier !!
+						if (a == 0 || a == 2)
+							System.out
+									.println("\t"
+											+ socket.getInetAddress()
+											+ ":"
+											+ socket.getPort()
+											+ " Acquittement de la transmission de la trame "
+											+ msgB.id);
+						if (a == 2) {
+							System.out
+									.println("\t"
+											+ socket.getInetAddress()
+											+ ":"
+											+ socket.getPort()
+											+ " Reffus de la transmission de la trame  "
+											+ msgB.id + " ("
+											+ msgB.getTabOct().length
+											+ " octets)");
+						} else {
+							System.out.println("\t" + socket.getInetAddress()
+									+ ":" + socket.getPort()
+									+ " Accepte la transmission de la trame  "
+									+ msgB.id + " (" + msgB.getTabOct().length
+									+ " octets)");
+							System.out.println("Message: " + msgB); // Reception
+																	// du
+																	// message
+																	// de
+																	// bienvenu
+						}
+
+						if (a == 0 || a == 2)
+							break;
+
+						oos.flush();
+					}
+
+				}
+
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+		// Envoie message de fin //
+		System.out.println("\n Envoi du message de Fin");
+		ObjectOutputStream oos;
+		try {
+			oos = new ObjectOutputStream(socket.getOutputStream());
+			String msgFin = new String("Fin");
+
+			Tram msgFbyte = new Tram(msgFin.getBytes(), 0);
+			oos.writeObject(msgFbyte);
+			oos.flush();
+			System.out.println("\t" + socket.getInetAddress() + ":"
+					+ socket.getPort() + " Transmission de la trame "
+					+ msgFbyte.getId()); // Reception del'ack //
+			//int j = 0; // pour tester la perte de trame 4 fois de suite
+			Tram ack = new Tram(null, -2);
+			while (true) {
+				try {
+					// recupere l'ACK
+					System.out.println("\t" + socket.getInetAddress() + ":"
+							+ socket.getPort()
+							+ " Activation du timeout 1000ms");// Dans le catch
+
+					try {
+
+						if(!Client.simLoseAck) ois = new ObjectInputStream(socket.getInputStream());
+						ack = (Tram) ois.readObject(); // si c timout l'ack //
+														// contiendera //
+														// toujours //l'ack de
+														// la trame //
+														// precedente
+
+					} catch (SocketTimeoutException ste) {
+						System.out
+								.println("timout 1000ms! pas de reception d'ack ");
+					}
+					if (ack.getId() == msgFbyte.id) { // soit timOut soit // le
+														// serveur a // envoyer
+														// un
+						// faux ack
+						System.out
+								.println("\t"
+										+ socket.getInetAddress()
+										+ ":"
+										+ socket.getPort()
+										+ " Recu acquittement de la transmission de trame n° :"
+										+ ack.getId());
+						break;
+					} else { //
+						//if (j == 4) { // pour tester la perte de trame 4 fois de
+										// suite
+							System.out
+									.println("l'ack de la trame n° : "
+											+ msgFbyte.id
+											+ " n'a pas ete recu !!! \n Renvoi de la trame contenant le message de Fin: "
+											+ msgFbyte.id);
+							oos.writeObject(msgFbyte);
+							oos.flush();
+						//}
+						// j++;
+
+					}
+
+				} catch (ClassNotFoundException e) { // TODO Auto-generated
+														// catch block
+					e.printStackTrace();
+				}
+
+			}
+
+		} catch (IOException e) { // TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	closeCnx();		
+	}
+	
+		
+	
 
 }
